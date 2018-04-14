@@ -1,0 +1,14 @@
+#!/bin/bash
+if [ ! -f "package.json" ]; then
+	echo "ERROR: current directory is not a node project root."
+	exit 1
+fi
+
+APP_USERNAME=http_debug
+APP_SERVICE=http_debug
+APP_SERVER=webapps
+APP_WORKING_DIR=/opt/http_debug/
+
+rsync -avz -e ssh --progress --exclude deploy.json --exclude node_modules * $APP_USERNAME@$APP_SERVER:$APP_WORKING_DIR
+ssh -t $APP_USERNAME@$APP_SERVER "cd $APP_WORKING_DIR ; npm install"
+#  ; sudo systemctl restart $APP_SERVICE"
