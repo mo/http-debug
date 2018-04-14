@@ -1,4 +1,15 @@
 const chalk = require('chalk')
+const commander = require('commander')
+
+function bufferToHex(buffer) {
+  const hexBody = buffer.toString('hex')
+  const hexBodyWithSpaces = [...Array(hexBody.length / 2)].map((v, i) => hexBody.slice(2*i, 2*(i + 1))).join(' ')
+  return hexBodyWithSpaces
+}
+
+commander
+  .option('-b, --body [format]', 'body output format [text|raw|hex]', /^(text|raw|hex)$/i, 'text')
+  .parse(process.argv)
 
 const port = 9191
 
@@ -17,11 +28,14 @@ const server = require('http').createServer((req, res) => {
     req.on('data', (chunk) => {
       data.push(chunk)
     }).on('end', () => {
-      body = Buffer.concat(data).toString()
-      if (/[\x00-\x1F]/.test(body)) {
-        console.log(chalk.green(`body contains ${body.length} bytes of binary data`))
+      const bodyBuffer = Buffer.concat(data)
+      const bodyUtf8 = bodyBuffer.toString('utf8')
+      if (commander.body === 'text' && /[\x00-\x08\x0E-\x1F]/.test(bodyUtf8)) {
+        console.log(chalk.green(`body contains ${chalk.blueBright(bodyBuffer.byteLength)} bytes of binary data (re-run with "--body hex" or "--body raw" to see binary data)`))
+      } else if (commander.body === 'hex') {
+        console.log(chalk.blueBright(bufferToHex(bodyBuffer)))
       } else {
-        console.log(chalk.magenta('request body="') + chalk.blueBright(body) + chalk.magenta('"'))
+        console.log(chalk.magenta('request body="') + chalk.blueBright(bodyUtf8) + chalk.magenta('"'))
       }
       console.log('\n')
     })
