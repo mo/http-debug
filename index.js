@@ -1,7 +1,6 @@
 const chalk = require('chalk')
 const commander = require('commander')
 const http = require('http')
-const https = require('http')
 
 function bufferToHex(buffer) {
   const hexBody = buffer.toString('hex')
@@ -58,9 +57,9 @@ function addCorsResponseHeaders(req, res) {
   }
 
   if (req.headers['access-control-request-headers']) {
-    res.setHeader("Access-Control-Allow-Headers", req.headers['access-control-request-headers'])
+    res.setHeader('Access-Control-Allow-Headers', req.headers['access-control-request-headers'])
   } else {
-    res.setHeader("Access-Control-Allow-Headers", '*')
+    res.setHeader('Access-Control-Allow-Headers', '*')
   }
 
   // "Access-Control-Max-Age: -1" means don't cache CORS pre-flight requests at all:
@@ -88,9 +87,7 @@ function printRequest(req, requestBodyBuffer) {
 }
 
 function printResponse(res, responseBodyBuffer) {
-  const timestamp = new Date().toISOString()
-
-  console.log(`------------------------------------------------------------------------------------------------`)
+  console.log('------------------------------------------------------------------------------------------------')
   console.log(chalk.cyan(res.statusCode) + ' ' + chalk.blueBright(res.statusMessage))
   console.log('')
   Object.entries(res.headers).forEach(([k,v]) => {
