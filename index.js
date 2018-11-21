@@ -1,6 +1,7 @@
 const chalk = require('chalk')
 const commander = require('commander')
 const http = require('http')
+const https = require('https')
 
 function bufferToHex(buffer) {
   const hexBody = buffer.toString('hex')
@@ -112,12 +113,20 @@ async function readBody(stream) {
 }
 
 async function logAndProxyRequest(req, res) {
-  const targetReq = http.request({
+  console.log(`connecting to proxy at: ${commander.targetScheme}: ${commander.targetHost} ${commander.targetPort}`)
+  const headers = req.headers
+  Object.keys(headers).forEach(key => {
+    if (key.toLowerCase() === 'host') {
+      headers[key] = commander.targetHost
+    }
+  })
+  const targetReq = https.request({
+    protocol: `${commander.targetScheme}:`,
     hostname: commander.targetHost,
     port: commander.targetPort,
     path: req.url,
     method: req.method,
-    headers: req.headers,
+    headers,
   })
 
   const requestBodyBuffer = await readBody(req)
@@ -155,8 +164,13 @@ commander
   .option('-l, --listen-port [port]', 'listen port', /\d{1,5}/, 9191)
   .option('-h, --target-host [host]', 'proxy target host', 'localhost')
   .option('-p, --target-port [port]', 'proxy target port', /\d{1,5}/)
-  .option('-s, --target-scheme [scheme]', 'proxy target scheme', /(http|https)/, 'http')
+  .option('-s, --target-scheme [scheme]', 'proxy target scheme', 'http')
   .parse(process.argv)
+
+if (!['http', 'https'].includes(commander.targetScheme)) {
+  console.log(`ERROR: invalid --target-scheme ${commander.targetScheme}`)
+  process.exit(1)
+}
 
 const server = http.createServer((req, res) => {
   if (commander.cors) {
