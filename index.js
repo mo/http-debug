@@ -66,12 +66,6 @@ function addCorsResponseHeaders(req, res) {
   // "Access-Control-Max-Age: -1" means don't cache CORS pre-flight requests at all:
   // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Access-Control-Max-Age
   res.setHeader('Access-Control-Max-Age', -1)
-
-  if (req.method === 'OPTIONS') {
-    res.writeHead(200)
-    res.end()
-    return
-  }
 }
 
 function printRequest(req, requestBodyBuffer) {
