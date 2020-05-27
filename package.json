@@ -4,18 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "eslint": "eslint .",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "eslint": "eslint ."
   },
   "keywords": [],
   "author": "Martin Olsson <martin@minimum.se> (https://mo.github.io)",
   "license": "MIT",
   "dependencies": {
-    "chalk": "^2.3.2",
-    "commander": "^2.15.1"
+    "chalk": "^4.0.0",
+    "commander": "^5.1.0"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.3",
-    "eslint": "^4.19.1"
+    "babel-eslint": "^10.1.0",
+    "eslint": "^7.1.0"
   }
 }
