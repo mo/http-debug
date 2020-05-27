@@ -130,7 +130,7 @@ async function logAndProxyRequest(req, res) {
       headers[key] = commander.targetHost
     }
   })
-  const targetReq = https.request({
+  const targetReq = (commander.targetScheme == 'http' ? http : https).request({
     protocol: `${commander.targetScheme}:`,
     hostname: commander.targetHost,
     port: commander.targetPort,
