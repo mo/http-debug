@@ -5,33 +5,49 @@ const https = require('https')
 
 function bufferToHex(buffer) {
   const hexBody = buffer.toString('hex')
-  const hexBodyWithSpaces = [...Array(hexBody.length / 2)].map((v, i) => hexBody.slice(2*i, 2*(i + 1))).join(' ')
+  const hexBodyWithSpaces = [...Array(hexBody.length / 2)].map((v, i) => hexBody.slice(2 * i, 2 * (i + 1))).join(' ')
   return hexBodyWithSpaces
 }
 
 function printBodyBuffer(bodyBuffer) {
   const bodyUtf8 = bodyBuffer.toString('utf8')
   if ((commander.body === 'text' || commander.body === 'text-maxlen') && /[\x00-\x08\x0E-\x1F]/.test(bodyUtf8)) {
-    console.log(chalk.green(`body contains ${chalk.blueBright(bodyBuffer.byteLength)} bytes of binary data (re-run with "--body hex" or "--body raw" or "--body printable" to see binary data)`))
+    console.log(
+      chalk.green(
+        `body contains ${chalk.blueBright(
+          bodyBuffer.byteLength
+        )} bytes of binary data (re-run with "--body hex" or "--body raw" or "--body printable" to see binary data)`
+      )
+    )
   } else if (commander.body === 'text-maxlen') {
     const bodyMaxLength = Number(commander.bodyMaxLength)
     if (bodyBuffer.byteLength > bodyMaxLength) {
       const truncatedBodyBuffer = bodyBuffer.slice(0, bodyMaxLength)
       const truncatedBodyText = truncatedBodyBuffer.toString('utf8')
-      console.log(chalk.red('"') + chalk.blueBright(truncatedBodyText) + chalk.red(`"\n(print-out truncated at ${bodyMaxLength} bytes, use --body-max-length N to adjust truncation limit)`))
+      console.log(
+        chalk.red('"') +
+          chalk.blueBright(truncatedBodyText) +
+          chalk.red(
+            `"\n(print-out truncated at ${bodyMaxLength} bytes, use --body-max-length N to adjust truncation limit)`
+          )
+      )
     } else {
       console.log(chalk.red('"') + chalk.blueBright(bodyUtf8) + chalk.red('"'))
     }
   } else if (commander.body === 'hex') {
     console.log(chalk.blueBright(bufferToHex(bodyBuffer)))
   } else if (commander.body === 'printable') {
-    const coloredPrintableBody = bodyBuffer.toString('ascii').split('').map(ch => {
-      if (/[\x00-\x09\x0B-\x0C\x0E-\x1F\x80-\xFF]/.test(ch)) {
-        return chalk.red('?')
-      } else {
-        return chalk.blueBright(ch)
-      }
-    }).join('')
+    const coloredPrintableBody = bodyBuffer
+      .toString('ascii')
+      .split('')
+      .map((ch) => {
+        if (/[\x00-\x09\x0B-\x0C\x0E-\x1F\x80-\xFF]/.test(ch)) {
+          return chalk.red('?')
+        } else {
+          return chalk.blueBright(ch)
+        }
+      })
+      .join('')
     console.log(coloredPrintableBody)
   } else {
     console.log(chalk.red('"') + chalk.blueBright(bodyUtf8) + chalk.red('"'))
@@ -74,7 +90,7 @@ function printRequest(req, requestBodyBuffer) {
   console.log(`===[ request received ${timestamp} ]================================================`)
   console.log(chalk.cyan(req.method) + ' ' + chalk.blueBright(req.url))
   console.log('')
-  Object.entries(req.headers).forEach(([k,v]) => {
+  Object.entries(req.headers).forEach(([k, v]) => {
     console.log(chalk.cyan(k) + ': ' + chalk.blueBright(v))
   })
   console.log('')
@@ -85,7 +101,7 @@ function printResponse(res, responseBodyBuffer) {
   console.log('------------------------------------------------------------------------------------------------')
   console.log(chalk.cyan(res.statusCode) + ' ' + chalk.blueBright(res.statusMessage))
   console.log('')
-  Object.entries(res.headers).forEach(([k,v]) => {
+  Object.entries(res.headers).forEach(([k, v]) => {
     console.log(chalk.cyan(k) + ': ' + chalk.blueBright(v))
   })
   console.log('')
@@ -109,7 +125,7 @@ async function readBody(stream) {
 async function logAndProxyRequest(req, res) {
   console.log(`connecting to proxy at: ${commander.targetScheme}: ${commander.targetHost} ${commander.targetPort}`)
   const headers = req.headers
-  Object.keys(headers).forEach(key => {
+  Object.keys(headers).forEach((key) => {
     if (key.toLowerCase() === 'host') {
       headers[key] = commander.targetHost
     }
@@ -153,7 +169,12 @@ async function logRequest(req, res) {
 
 commander
   .option('-c, --cors', 'always return "allow everything" CORS headers')
-  .option('-b, --body [format]', 'body output format [text|raw|hex|printable]', /^(text|text-maxlen|raw|hex|printable)$/i, 'text-maxlen')
+  .option(
+    '-b, --body [format]',
+    'body output format [text|raw|hex|printable]',
+    /^(text|text-maxlen|raw|hex|printable)$/i,
+    'text-maxlen'
+  )
   .option('-m, --body-max-length [byte_length]', 'body max length', 1000)
   .option('-l, --listen-port [port]', 'listen port', /\d{1,5}/, 9191)
   .option('-h, --target-host [host]', 'proxy target host', 'localhost')
